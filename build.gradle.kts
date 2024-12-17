@@ -23,6 +23,7 @@ dependencyManagement {
 
 dependencies {
     implementation(libs.spring.boot.starter.web)
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
     annotationProcessor(libs.spring.boot.configuration.processor)
@@ -34,9 +35,9 @@ java {
     sourceCompatibility = JavaVersion.VERSION_17
 }
 
-with(extensions.getByType(JacocoPluginExtension::class.java)) {
-    toolVersion = "0.8.7"
-}
+//with(extensions.getByType(JacocoPluginExtension::class.java)) {
+//    toolVersion = "0.8.7"
+//}
 
 // bundling tasks
 tasks.getByName("bootJar") {
