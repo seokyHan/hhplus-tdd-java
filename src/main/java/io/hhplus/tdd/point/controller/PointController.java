@@ -1,5 +1,11 @@
-package io.hhplus.tdd.point;
+package io.hhplus.tdd.point.controller;
 
+import io.hhplus.tdd.point.controller.request.UserPointRequest;
+import io.hhplus.tdd.point.domain.PointHistory;
+import io.hhplus.tdd.point.domain.UserPoint;
+import io.hhplus.tdd.point.service.PointManageService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -7,9 +13,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/point")
 public class PointController {
 
+    private final PointManageService pointManageService;
     private static final Logger log = LoggerFactory.getLogger(PointController.class);
 
     /**
@@ -19,7 +27,7 @@ public class PointController {
     public UserPoint point(
             @PathVariable long id
     ) {
-        return new UserPoint(0, 0, 0);
+        return pointManageService.getUserPoint(id);
     }
 
     /**
@@ -29,7 +37,7 @@ public class PointController {
     public List<PointHistory> history(
             @PathVariable long id
     ) {
-        return List.of();
+        return pointManageService.getPointHistoriesByUserId(id);
     }
 
     /**
@@ -38,9 +46,9 @@ public class PointController {
     @PatchMapping("{id}/charge")
     public UserPoint charge(
             @PathVariable long id,
-            @RequestBody long amount
+            @Valid @RequestBody UserPointRequest userPointRequest
     ) {
-        return new UserPoint(0, 0, 0);
+        return pointManageService.chargePoint(id, userPointRequest.amount());
     }
 
     /**
@@ -49,8 +57,8 @@ public class PointController {
     @PatchMapping("{id}/use")
     public UserPoint use(
             @PathVariable long id,
-            @RequestBody long amount
+            @Valid @RequestBody UserPointRequest userPointRequest
     ) {
-        return new UserPoint(0, 0, 0);
+        return pointManageService.usePoint(id, userPointRequest.amount());
     }
 }
