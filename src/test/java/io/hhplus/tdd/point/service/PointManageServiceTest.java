@@ -10,15 +10,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 
 import static io.hhplus.tdd.point.domain.type.TransactionType.CHARGE;
 import static io.hhplus.tdd.point.domain.type.TransactionType.USE;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class PointManageServiceTest {
+
+
+    /**
+     * 개별 단위테스트들이 정상 동작 하면 굳이 통합테스트는 작성하지 않아도 되지 않나? 할 수 있지만
+     * 검증된 단위 테스트들이 시스템 내에서 여러 의존성들이 있는 상황에서도 정상 동작하는지 확인하기 위해
+     * 통합테스트를 작성했습니다.
+     *
+     */
 
     @Autowired
     private PointManageService pointManageService;
@@ -69,24 +80,37 @@ class PointManageServiceTest {
 
     @DisplayName("유저가 포인트를 충전하면 기존 금액에 충전 금액이 더해지고, 유저의 포인트 충전/이용 내역에 저장된다.")
     @Test
-    void chargePointTest() {
+    void chargePointTest() throws InterruptedException{
         //given
-        long id = 2L;
-        long amount = 1000L;
-        long chargeAmount = 500L;
-        userPointTable.insertOrUpdate(id, amount);
+        long id = 99L;
+        long amount = 100L;
+        int threadCount = 10;
+        ExecutorService executorService = newFixedThreadPool(threadCount);
+        CountDownLatch latch = new CountDownLatch(threadCount);
 
         //when
-        UserPoint userPoint = pointManageService.chargePoint(id, chargeAmount);
+        for(int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    pointManageService.chargePoint(id, amount);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+        latch.await();
+
+        UserPoint userPoint = pointManageService.getUserPoint(id);
 
         //then
-        assertEquals(id, userPoint.id());
-        assertEquals((amount + chargeAmount), userPoint.point());
-
-        assertThat(pointManageService.getPointHistoriesByUserId(id)).hasSize(1)
+        assertEquals(1000L, userPoint.point());
+        assertThat(pointManageService.getPointHistoriesByUserId(id)).hasSize(10)
                 .extracting("userId", "amount", "type")
                 .containsExactlyInAnyOrder(
-                        tuple(2L, 500L, CHARGE)
+                        tuple(99L, 100L, CHARGE), tuple(99L, 100L, CHARGE), tuple(99L, 100L, CHARGE),
+                        tuple(99L, 100L, CHARGE), tuple(99L, 100L, CHARGE), tuple(99L, 100L, CHARGE),
+                        tuple(99L, 100L, CHARGE), tuple(99L, 100L, CHARGE), tuple(99L, 100L, CHARGE),
+                        tuple(99L, 100L, CHARGE)
                 );
 
 
@@ -95,24 +119,40 @@ class PointManageServiceTest {
 
     @DisplayName("유저가 포인트를 사용하면 기존 금액에서 사용한 금액만큼 차감되고, 유저의 포인트 충전/이용 내역에 저장된다.")
     @Test
-    void usePointTest() {
+    void usePointTest() throws InterruptedException{
         //given
         long id = 3L;
-        long amount = 2000L;
-        long useAmount = 1500L;
+        long amount = 1500L;
+        long useAmount = 100L;
+        int threadCount = 10;
         userPointTable.insertOrUpdate(id, amount);
 
+        ExecutorService executorService = newFixedThreadPool(threadCount);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+
         //when
-        UserPoint userPoint = pointManageService.usePoint(id, useAmount);
+        for(int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    pointManageService.usePoint(id, useAmount);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+        latch.await();
+
+        UserPoint userPoint = pointManageService.getUserPoint(id);
 
         //then
-        assertEquals(id, userPoint.id());
-        assertEquals((amount - useAmount), userPoint.point());
-
-        assertThat(pointManageService.getPointHistoriesByUserId(id)).hasSize(1)
+        assertEquals(500L, userPoint.point());
+        assertThat(pointManageService.getPointHistoriesByUserId(id)).hasSize(10)
                 .extracting("userId", "amount", "type")
                 .containsExactlyInAnyOrder(
-                        tuple(3L, 1500L, USE)
+                        tuple(3L, 100L, USE), tuple(3L, 100L, USE), tuple(3L, 100L, USE),
+                        tuple(3L, 100L, USE), tuple(3L, 100L, USE), tuple(3L, 100L, USE),
+                        tuple(3L, 100L, USE), tuple(3L, 100L, USE), tuple(3L, 100L, USE),
+                        tuple(3L, 100L, USE)
                 );
 
 
