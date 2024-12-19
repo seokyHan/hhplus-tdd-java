@@ -28,6 +28,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = PointController.class)
 class PointControllerTest {
 
+    /**
+     * 클라이언트의 요청 값과 설계한대로의 응답도 정상 동작 하는지도 검증이 필요하기 때문에
+     * @WebMvcTest를 사용하여 컨트롤러 통합테스트를 작성했습니다.
+     */
+
     @Autowired
     private MockMvc mockMvc;
     @Autowired

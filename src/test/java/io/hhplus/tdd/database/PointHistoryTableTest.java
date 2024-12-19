@@ -16,6 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class PointHistoryTableTest {
 
+    /**
+     * UserPointTableTest와 마찬가지로 실제로 우리가 제어할 수 있는 영역에 있는 로직들이라서
+     * 단위테스트를 작성하게 되었습니다.
+     */
+
     private PointHistoryTable pointHistoryTable;
 
     @BeforeEach

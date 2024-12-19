@@ -8,6 +8,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserPointTest {
 
+    /**
+     * 제공해 주신 템플릿에서 UserPoint는 Domain의 entity라고 생각을 하고
+     * 포인트 충전/사용 관련 비즈니스로직을 설계했습니다.
+     * 그에 따라 제가 설계한 로직들이 설계한대로 정상 동작하는지에 대한 단위테스트를 작성했습니다.
+     */
+
     @DisplayName("유저가 1000 포인트를 가진 상태에서 1000 포인트를 충전하면 2000 포인트가 된다.")
     @Test
     void chargeAmountTest() {
